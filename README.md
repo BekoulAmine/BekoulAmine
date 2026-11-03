@@ -62,8 +62,8 @@ motto:       "Building, breaking, learning, and building again."
 ### 📊 Adventure Stats
 
 <p align="center">
-  <img height="170" src="https://github-readme-stats.vercel.app/api?username=BekoulAmine&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=1b1d2a&title_color=d3bc8e&icon_color=74c2a8&text_color=ece5d8&custom_title=Adventure%20Stats" alt="stats"/>
-  <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=BekoulAmine&layout=compact&hide_border=true&bg_color=1b1d2a&title_color=d3bc8e&text_color=ece5d8&custom_title=Elemental%20Mastery" alt="langs"/>
+  <img height="170" src="cards/stats.svg" alt="stats"/>
+  <img height="170" src="cards/langs.svg" alt="langs"/>
 </p>
 
 <p align="center">
@@ -71,11 +71,7 @@ motto:       "Building, breaking, learning, and building again."
 </p>
 
 <p align="center">
-  <img src="https://github-profile-trophy.vercel.app/?username=BekoulAmine&theme=onedark&no-frame=true&no-bg=true&margin-w=6&column=7" alt="trophies"/>
-</p>
-
-<p align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=BekoulAmine&bg_color=1b1d2a&color=d3bc8e&line=74c2a8&point=ece5d8&area=true&area_color=74c2a8&hide_border=true&custom_title=Resin%20Spent%20(Contributions)" alt="activity graph"/>
+  <img src="cards/activity.svg" alt="activity graph"/>
 </p>
 
 ---
