@@ -91,7 +91,7 @@ def langs_svg(u: dict) -> str:
     top = sorted(sizes.items(), key=lambda kv: -kv[1][0])[:6]
     total = sum(s for _, (s, _) in top) or 1
     if not top:
-        return card(350, 200, "Elemental Mastery", f'<text x="25" y="100" font-size="14" fill="{DIM}">No public repos yet: the journey begins!</text>')
+        return card(350, 200, "Elemental Mastery", f'<text x="25" y="100" font-size="14" fill="{DIM}">No code in public repos yet: the journey begins!</text>')
     bar, x = "", 25.0
     for _, (s, color) in top:
         width = 300 * s / total
