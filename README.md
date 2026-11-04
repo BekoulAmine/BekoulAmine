@@ -41,9 +41,9 @@ motto:       "Building, breaking, learning, and building again."
 <!--START_SECTION:teyvat-->
 | 🌟 Character of the day | 🧭 Today's quest | 🎲 Daily wish |
 |:-:|:--|:--|
-| **Nahida**<br>🌿 Dendro · Sumeru | Write a test before the bug finds you, like checking the map before a domain. | 💙💙💙 Blue star... another **Slingshot**. Pity +1. |
+| **Alhaitham**<br>🌿 Dendro · Sumeru | Refactor one legacy function — it has been waiting longer than my 50/50. | 💙💙💙 Blue star... another **Harbinger of Dawn**. Pity +1. |
 
-<sub>🕒 Refreshed by GitHub Actions on 2026-11-03 (Teyvat server reset)</sub>
+<sub>🕒 Refreshed by GitHub Actions on 2026-11-04 (Teyvat server reset)</sub>
 <!--END_SECTION:teyvat-->
 
 ---
