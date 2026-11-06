@@ -1,6 +1,6 @@
 <!-- Banner -->
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:1b1d2a,50:3d4a6b,100:d3bc8e&height=200&section=header&text=Welcome%20to%20my%20Teyvat%20✦&fontSize=42&fontColor=ece5d8&animation=fadeIn&fontAlignY=38&desc=A%20Traveler%20from%20Algiers&descAlignY=58&descSize=18" alt="banner"/>
+  <img src="assets/banner.svg" width="100%" alt="Welcome to my Teyvat: a traveler from Algiers"/>
 </p>
 
 <p align="center">
