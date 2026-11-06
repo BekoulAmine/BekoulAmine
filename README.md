@@ -41,9 +41,9 @@ motto:       "Building, breaking, learning, and building again."
 <!--START_SECTION:teyvat-->
 | 🌟 Character of the day | 🧭 Today's quest | 🎲 Daily wish |
 |:-:|:--|:--|
-| **Tighnari**<br>🌿 Dendro · Sumeru | Ship a small PR. Small commits, like daily commissions, add up to Primogems. | 💙💙💙 Blue star... another **Slingshot**. Pity +1. |
+| **Furina**<br>💧 Hydro · Fontaine | Review a teammate's PR. Co-op mode gives bonus EXP. | 💙💙💙 Blue star... another **Thrilling Tales of Dragon Slayers**. Pity +1. |
 
-<sub>🕒 Refreshed by GitHub Actions on 2026-11-05 (Teyvat server reset)</sub>
+<sub>🕒 Refreshed by GitHub Actions on 2026-11-06 (Teyvat server reset)</sub>
 <!--END_SECTION:teyvat-->
 
 ---
