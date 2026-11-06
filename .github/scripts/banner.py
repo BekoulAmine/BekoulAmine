@@ -1,6 +1,6 @@
 """Generates assets/banner.svg: a pixel-art Teyvat night scene (W x H logical pixels, scaled by the viewer).
 
-Usage: python banner.py [out_path]
+Usage: python banner.py [out_dir]  (writes banner.svg and footer.svg)
 """
 import math, os, random, sys
 import xml.etree.ElementTree as ET
@@ -17,6 +17,7 @@ GLYPHS = {  # 5x5 pixel font, rows separated by "/"
     "O": ".###./#...#/#...#/#...#/.###.", "R": "####./#...#/####./#..#./#...#",
     "S": ".####/#..../.###./....#/####.", "T": "#####/..#../..#../..#../..#..",
     "V": "#...#/#...#/#...#/.#.#./..#..", "W": "#...#/#...#/#.#.#/##.##/#...#",
+    "Q": ".###./#...#/#.#.#/#..#./.##.#", "U": "#...#/#...#/#...#/#...#/.###.",
     "Y": "#...#/.#.#./..#../..#../..#..", " ": "...../...../...../...../.....",
 }
 
@@ -35,7 +36,7 @@ TOWER_PAL = {"r": "#b5523b", "s": "#8a8fa8", "d": "#3b3f58"}
 BANDS = [(0, "#0d0e1a"), (8, "#14162a"), (14, "#1b1d2a"), (19, "#262a48"), (24, "#3d4a6b"),
          (29, "#6b6a8a"), (34, "#a58f7c"), (39, "#d3bc8e")]
 
-TITLE, SUBTITLE = "WELCOME TO MY TEYVAT", "A TRAVELER FROM ALGIERS"
+TITLE, SUBTITLE, MOTTO = "WELCOME TO MY TEYVAT", "A TRAVELER FROM ALGIERS", "AD ASTRA ABYSSOSQUE"
 
 
 def rect(x, y, w, h, fill, extra=""):
@@ -88,11 +89,12 @@ def stair(top, dy, fill):
     return f'<path d="{d}" fill="{fill}"/>'
 
 
-def build() -> str:
+def build(footer=False) -> str:
+    """Header: full scene. Footer: same scene cropped to the lower sky, motto only, no moon or Paimon."""
     rng = random.Random(7)
-    tw = (len(TITLE) * 6 - 1, len(SUBTITLE) * 6 - 1)
-    tx, sx = (W - tw[0]) // 2, (W - tw[1]) // 2
-    keep_out = [(tx - 2, 7, tx + tw[0] + 2, 16), (sx - 2, 17, sx + tw[1] + 2, 26)]
+    lines = [(MOTTO, 20, "#d3bc8e")] if footer else [(TITLE, 8, "#d3bc8e"), (SUBTITLE, 18, "#74c2a8")]
+    xs = [(W - (len(s) * 6 - 1)) // 2 for s, _, _ in lines]
+    keep_out = [(x - 2, y - 1, x + len(s) * 6 + 1, y + 8) for x, (s, y, _) in zip(xs, lines)]
 
     defs = ["<style>.fa{animation:a 1.2s step-end infinite}.fb{animation:b 1.2s step-end infinite}"
             ".bob{animation:bob 2s step-end infinite}.t{animation:t 2.4s step-end infinite}"
@@ -120,9 +122,9 @@ def build() -> str:
     mx, my, mr = 178, 11, 7  # moon with craters
     for y in range(my - mr, my + mr + 1):
         for x in range(mx - mr, mx + mr + 1):
-            if (x - mx) ** 2 + (y - my) ** 2 <= mr * mr:
+            if not footer and (x - mx) ** 2 + (y - my) ** 2 <= mr * mr:
                 body.append(rect(x, y, 1, 1, "#ece5d8"))
-    for cx, cy in [(175, 9), (180, 13), (177, 14)]:
+    for cx, cy in [] if footer else [(175, 9), (180, 13), (177, 14)]:
         body.append(rect(cx, cy, 1, 1, "#d3bc8e"))
 
     # hazy far range, dark near range, then Anemo-green hills
@@ -139,22 +141,28 @@ def build() -> str:
         body.append(f'<g class="{cls}">' + "".join(rect(x, y, 1, 1, "#ece5d8") for x, y in pts) + "</g>")
     body.append(rect(cx, cy, 1, 1, "#3b3f58"))
 
-    body.append('<g class="bob">' + "".join(sprite(PAIMON, PAIMON_PAL, 176, 24)) + "</g>")
-    for gx, gy, d in [(tx - 11, 8, 0), (tx + tw[0] + 6, 8, 1.2)]:
-        body.append(f'<g class="t" style="animation-delay:-{d}s">' + "".join(sprite(GEM, GEM_PAL, gx, gy)) + "</g>")
+    if not footer:
+        body.append('<g class="bob">' + "".join(sprite(PAIMON, PAIMON_PAL, 176, 24)) + "</g>")
+    s0, y0_, _ = lines[0]
+    for gx, d in [(xs[0] - 11, 0), (xs[0] + len(s0) * 6 + 5, 1.2)]:
+        body.append(f'<g class="t" style="animation-delay:-{d}s">' + "".join(sprite(GEM, GEM_PAL, gx, y0_)) + "</g>")
 
-    body += text(TITLE, tx + 1, 9, "#0d0e1a") + text(TITLE, tx, 8, "#d3bc8e")
-    body += text(SUBTITLE, sx + 1, 19, "#0d0e1a") + text(SUBTITLE, sx, 18, "#74c2a8")
+    for (s, y, color), x in zip(lines, xs):
+        body += text(s, x + 1, y + 1, "#0d0e1a") + text(s, x, y, color)
 
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" shape-rendering="crispEdges" role="img" '
-            f'aria-label="Welcome to my Teyvat: a traveler from Algiers"><defs>{"".join(defs)}</defs>{"".join(body)}</svg>')
+    view = f"0 14 {W} {H - 14}" if footer else f"0 0 {W} {H}"
+    label = "Ad astra abyssosque" if footer else "Welcome to my Teyvat: a traveler from Algiers"
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view}" shape-rendering="crispEdges" role="img" '
+            f'aria-label="{label}"><defs>{"".join(defs)}</defs>{"".join(body)}</svg>')
 
 
 if __name__ == "__main__":
-    out = sys.argv[1] if len(sys.argv) > 1 else "assets/banner.svg"
-    svg = build()
-    ET.fromstring(svg)  # must be well-formed XML
-    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
-    with open(out, "w", encoding="utf-8", newline="\n") as f:
-        f.write(svg)
-    print(f"wrote {out} ({len(svg) // 1024} KB)")
+    out_dir = sys.argv[1] if len(sys.argv) > 1 else "assets"
+    os.makedirs(out_dir, exist_ok=True)
+    for name, footer in (("banner.svg", False), ("footer.svg", True)):
+        svg = build(footer)
+        ET.fromstring(svg)  # must be well-formed XML
+        path = os.path.join(out_dir, name)
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(svg)
+        print(f"wrote {path} ({len(svg) // 1024} KB)")

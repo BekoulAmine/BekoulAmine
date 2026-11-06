@@ -114,5 +114,5 @@ I'm always open to interesting projects, collaborations and co-op runs with othe
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-d3bc8e?style=for-the-badge&logo=github&labelColor=1b1d2a)](https://github.com/BekoulAmine)
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:d3bc8e,50:3d4a6b,100:1b1d2a&height=120&section=footer&text=Ad%20astra%20abyssosque%20✦&fontSize=22&fontColor=ece5d8&fontAlignY=70" alt="footer"/>
+  <img src="assets/footer.svg" width="100%" alt="Ad astra abyssosque"/>
 </p>
