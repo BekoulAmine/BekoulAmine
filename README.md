@@ -48,7 +48,7 @@
 Open to interesting projects, collaborations and opportunities to learn from other developers.
 
 - GitHub: [github.com/BekoulAmine](https://github.com/BekoulAmine)
-- LinkedIn: [mohamed-amine-bekoul](https://www.linkedin.com/in/mohamed-amine-bekoul/)
+- LinkedIn: [aminebekoul](https://www.linkedin.com/in/aminebekoul/)
 
 ---
 
