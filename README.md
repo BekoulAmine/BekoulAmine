@@ -41,9 +41,9 @@ motto:       "Building, breaking, learning, and building again."
 <!--START_SECTION:teyvat-->
 | 🌟 Character of the day | 🧭 Today's quest | 🎲 Daily wish |
 |:-:|:--|:--|
-| **Furina**<br>💧 Hydro · Fontaine | Review a teammate's PR. Co-op mode gives bonus EXP. | 💙💙💙 Blue star... another **Thrilling Tales of Dragon Slayers**. Pity +1. |
+| **Neuvillette**<br>💧 Hydro · Fontaine | Clean up your Docker images. Your storage is fuller than a 2000/2000 Mora bag. | 💙💙💙 Blue star... another **Slingshot**. Pity +1. |
 
-<sub>🕒 Refreshed by GitHub Actions on 2026-11-06 (Teyvat server reset)</sub>
+<sub>🕒 Refreshed by GitHub Actions on 2026-11-07 (Teyvat server reset)</sub>
 <!--END_SECTION:teyvat-->
 
 ---
