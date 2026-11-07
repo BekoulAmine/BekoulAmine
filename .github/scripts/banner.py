@@ -1,42 +1,53 @@
-"""Generates assets/banner.svg: a pixel-art Teyvat night scene (W x H logical pixels, scaled by the viewer).
+"""Generates the pixel-art assets in assets/: banner, footer, section headings, divider and the tech-stack panel.
 
-Usage: python banner.py [out_dir]  (writes banner.svg and footer.svg)
+Everything is drawn from one 5x5 pixel font, so the README has no external image dependencies.
+Usage: python banner.py [out_dir]
 """
 import math, os, random, sys
 import xml.etree.ElementTree as ET
 
 W, H = 200, 60
+GREEN, WHITE, DIM, GRAY, PANEL, INK = "#79ff97", "#e6edf3", "#8b949e", "#30363d", "#161b22", "#0d1117"
 
 GLYPHS = {  # 5x5 pixel font, rows separated by "/"
     "A": ".###./#...#/#####/#...#/#...#", "B": "####./#...#/####./#...#/####.",
     "C": ".####/#..../#..../#..../.####", "D": "####./#...#/#...#/#...#/####.",
     "E": "#####/#..../####./#..../#####", "F": "#####/#..../####./#..../#....",
     "G": ".####/#..../#..##/#...#/.####", "H": "#...#/#...#/#####/#...#/#...#",
-    "I": "#####/..#../..#../..#../#####", "L": "#..../#..../#..../#..../#####",
+    "I": "#####/..#../..#../..#../#####", "J": "..###/...#./...#./#..#./.##..",
+    "K": "#...#/#..#./###../#..#./#...#", "L": "#..../#..../#..../#..../#####",
     "M": "#...#/##.##/#.#.#/#...#/#...#", "N": "#...#/##..#/#.#.#/#..##/#...#",
-    "O": ".###./#...#/#...#/#...#/.###.", "R": "####./#...#/####./#..#./#...#",
+    "O": ".###./#...#/#...#/#...#/.###.", "P": "####./#...#/####./#..../#....",
+    "Q": ".###./#...#/#.#.#/#..#./.##.#", "R": "####./#...#/####./#..#./#...#",
     "S": ".####/#..../.###./....#/####.", "T": "#####/..#../..#../..#../..#..",
-    "V": "#...#/#...#/#...#/.#.#./..#..", "W": "#...#/#...#/#.#.#/##.##/#...#",
-    "Q": ".###./#...#/#.#.#/#..#./.##.#", "U": "#...#/#...#/#...#/#...#/.###.",
+    "U": "#...#/#...#/#...#/#...#/.###.", "V": "#...#/#...#/#...#/.#.#./..#..",
+    "W": "#...#/#...#/#.#.#/##.##/#...#", "X": "#...#/.#.#./..#../.#.#./#...#",
     "Y": "#...#/.#.#./..#../..#../..#..", " ": "...../...../...../...../.....",
 }
 
-PAIMON = [
-    "....g.g....", "....ggg....", "...wwwww...", "..wwwwwww..", "..wsssssw..", "..wsesesw..",
-    "..wsssssw..", "...wwsww...", "..bbwwwbb..", ".bbbwwwbbb.", ".bdbwwwbdb.", "..d.www.d..", ".....w.w...",
+ROCKET = [
+    "...w...", "..www..", "..wbw..", "..www..", ".wwwww.", ".wwwww.", ".rwwwr.", ".r.w.r.", "...o...", "..oyo..", "...y...",
 ]
-PAIMON_PAL = {"g": "#d3bc8e", "w": "#f4f4f4", "s": "#f6d7b8", "e": "#3a7bd5", "b": "#5f8fe0", "d": "#243a73"}
+ROCKET_PAL = {"w": WHITE, "b": "#58a6ff", "r": "#f85149", "o": "#ffa657", "y": "#f2cc60"}
 
 GEM = ["..b..", ".bwb.", "bwbbb", ".bbb.", "..b.."]
-GEM_PAL = {"b": "#8fb4ff", "w": "#ffffff"}
+GEM_PAL = {"b": GREEN, "w": WHITE}
 
 TOWER = ["..rrr..", ".rrrrr.", "..sss..", "..sds..", "..sss..", ".sssss.", ".sssss.", "sssdsss"]
 TOWER_PAL = {"r": "#b5523b", "s": "#8a8fa8", "d": "#3b3f58"}
 
-BANDS = [(0, "#0d0e1a"), (8, "#14162a"), (14, "#1b1d2a"), (19, "#262a48"), (24, "#3d4a6b"),
-         (29, "#6b6a8a"), (34, "#a58f7c"), (39, "#d3bc8e")]
+# deep blue night fading through teal into a neon-green horizon
+BANDS = [(0, "#0d1117"), (8, "#111a26"), (14, "#152238"), (19, "#1a2f4d"), (24, "#233f66"),
+         (29, "#2a6a7a"), (34, "#3a9c6a"), (39, "#79ff97")]
 
-TITLE, SUBTITLE, MOTTO = "WELCOME TO MY TEYVAT", "A TRAVELER FROM ALGIERS", "AD ASTRA ABYSSOSQUE"
+TITLE, SUBTITLE, MOTTO = "AMINE BEKOUL", "FULL STACK DEVELOPER", "BUILD BREAK LEARN REPEAT"
+HEADINGS = {"stats": "STATS", "stack": "TECH STACK", "snake": "SNAKE GAME", "learning": "LEARNING", "connect": "CONNECT"}
+STACK = [
+    ("LANGUAGES", GREEN, ["PYTHON", "JAVASCRIPT", "C", "JAVA"]),
+    ("FRONTEND", "#58a6ff", ["REACT", "VITE", "TAILWIND", "HTML", "CSS"]),
+    ("BACKEND", "#ffa657", ["DJANGO", "DRF", "POSTGRESQL"]),
+    ("TOOLS", "#d2a8ff", ["GIT", "GITHUB", "LINUX", "POSTMAN", "VS CODE"]),
+]
 
 
 def rect(x, y, w, h, fill, extra=""):
@@ -65,9 +76,18 @@ def sprite(rows, pal, ox, oy):
 def text(s, x, y, color):
     out = []
     for i, ch in enumerate(s):
-        rows = GLYPHS[ch].split("/")
-        out += sprite(rows, {"#": color}, x + i * 6, y)
+        out += sprite(GLYPHS[ch].split("/"), {"#": color}, x + i * 6, y)
     return out
+
+
+def text_width(s):
+    return len(s) * 6 - 1
+
+
+def svg(w, h, body, label, scale=None, defs="", y0=0):
+    size = f' width="{w * scale}" height="{h * scale}"' if scale else ""
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 {y0} {w} {h}"{size} shape-rendering="crispEdges" '
+            f'role="img" aria-label="{label}">{f"<defs>{defs}</defs>" if defs else ""}{"".join(body)}</svg>')
 
 
 def hill(x):
@@ -89,11 +109,11 @@ def stair(top, dy, fill):
     return f'<path d="{d}" fill="{fill}"/>'
 
 
-def build(footer=False) -> str:
-    """Header: full scene. Footer: same scene cropped to the lower sky, motto only, no moon or Paimon."""
+def scene(footer=False) -> str:
+    """Header: full scene. Footer: same scene cropped to the lower sky, motto only, no moon or rocket."""
     rng = random.Random(7)
-    lines = [(MOTTO, 20, "#d3bc8e")] if footer else [(TITLE, 8, "#d3bc8e"), (SUBTITLE, 18, "#74c2a8")]
-    xs = [(W - (len(s) * 6 - 1)) // 2 for s, _, _ in lines]
+    lines = [(MOTTO, 20, GREEN)] if footer else [(TITLE, 8, GREEN), (SUBTITLE, 18, WHITE)]
+    xs = [(W - text_width(s)) // 2 for s, _, _ in lines]
     keep_out = [(x - 2, y - 1, x + len(s) * 6 + 1, y + 8) for x, (s, y, _) in zip(xs, lines)]
 
     defs = ["<style>.fa{animation:a 1.2s step-end infinite}.fb{animation:b 1.2s step-end infinite}"
@@ -115,21 +135,19 @@ def build(footer=False) -> str:
         x, y = rng.randrange(W), rng.randrange(27)
         if any(a <= x <= c and b <= y <= d for a, b, c, d in keep_out):
             continue
-        color = rng.choice(["#ece5d8", "#d3bc8e", "#8fb4ff"])
+        color = rng.choice([WHITE, GREEN, "#58a6ff"])
         cls = f' class="t" style="animation-delay:-{rng.random() * 2.4:.1f}s"' if rng.random() < 0.4 else ""
         body.append(rect(x, y, 1, 1, color, cls))
 
-    mx, my, mr = 178, 11, 7  # moon with craters
-    for y in range(my - mr, my + mr + 1):
-        for x in range(mx - mr, mx + mr + 1):
-            if not footer and (x - mx) ** 2 + (y - my) ** 2 <= mr * mr:
-                body.append(rect(x, y, 1, 1, "#ece5d8"))
-    for cx, cy in [] if footer else [(175, 9), (180, 13), (177, 14)]:
-        body.append(rect(cx, cy, 1, 1, "#d3bc8e"))
+    if not footer:  # moon with craters
+        mx, my, mr = 178, 11, 7
+        body += [rect(x, y, 1, 1, WHITE) for y in range(my - mr, my + mr + 1) for x in range(mx - mr, mx + mr + 1)
+                 if (x - mx) ** 2 + (y - my) ** 2 <= mr * mr]
+        body += [rect(cx, cy, 1, 1, "#c9d1d9") for cx, cy in [(175, 9), (180, 13), (177, 14)]]
 
-    # hazy far range, dark near range, then Anemo-green hills
-    body += [stair(FAR, 0, "#6b6a8a"), stair(NEAR, 0, "#2b3350")]
-    body += [stair(hill, 0, "#4fa38a"), stair(hill, 1, "#2e6b5e"), stair(hill, 3, "#1f3d3a")]
+    # dark teal far range, darker near range, then green hills
+    body += [stair(FAR, 0, "#0f3b4a"), stair(NEAR, 0, "#091f2b")]
+    body += [stair(hill, 0, "#5fd67b"), stair(hill, 1, "#2f8f55"), stair(hill, 3, "#143d2a")]
 
     wx = 14  # windmill: tower plus two blade frames that alternate
     y0 = hill(wx) - 6
@@ -138,31 +156,59 @@ def build(footer=False) -> str:
     plus = [(cx + k * dx, cy + k * dy) for k in range(1, 6) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))]
     diag = [(cx + k * dx, cy + k * dy) for k in range(1, 5) for dx in (1, -1) for dy in (1, -1)]
     for cls, pts in (("fa", plus), ("fb", diag)):
-        body.append(f'<g class="{cls}">' + "".join(rect(x, y, 1, 1, "#ece5d8") for x, y in pts) + "</g>")
+        body.append(f'<g class="{cls}">' + "".join(rect(x, y, 1, 1, WHITE) for x, y in pts) + "</g>")
     body.append(rect(cx, cy, 1, 1, "#3b3f58"))
 
     if not footer:
-        body.append('<g class="bob">' + "".join(sprite(PAIMON, PAIMON_PAL, 176, 24)) + "</g>")
+        body.append('<g class="bob">' + "".join(sprite(ROCKET, ROCKET_PAL, 178, 22)) + "</g>")
     s0, y0_, _ = lines[0]
     for gx, d in [(xs[0] - 11, 0), (xs[0] + len(s0) * 6 + 5, 1.2)]:
         body.append(f'<g class="t" style="animation-delay:-{d}s">' + "".join(sprite(GEM, GEM_PAL, gx, y0_)) + "</g>")
 
     for (s, y, color), x in zip(lines, xs):
-        body += text(s, x + 1, y + 1, "#0d0e1a") + text(s, x, y, color)
+        body += text(s, x + 1, y + 1, INK) + text(s, x, y, color)
 
-    view = f"0 14 {W} {H - 14}" if footer else f"0 0 {W} {H}"
-    label = "Ad astra abyssosque" if footer else "Welcome to my Teyvat: a traveler from Algiers"
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view}" shape-rendering="crispEdges" role="img" '
-            f'aria-label="{label}"><defs>{"".join(defs)}</defs>{"".join(body)}</svg>')
+    label = ", ".join(s.title() for s, _, _ in lines)
+    return svg(W, H - 14 if footer else H, body, label, defs="".join(defs), y0=14 if footer else 0)
+
+
+def heading(s) -> str:
+    w = 8 + text_width(s)
+    body = sprite(GEM, GEM_PAL, 0, 0) + text(s, 8, 0, GREEN) + [rect(0, 7, w, 1, GRAY), rect(0, 7, 5, 1, GREEN)]
+    return svg(w, 8, body, s.title(), scale=3)
+
+
+def divider() -> str:
+    w, gem_x = 200, 97
+    body = [rect(x, 2, 1, 1, GRAY) for x in range(0, w, 2) if not gem_x - 3 <= x <= gem_x + 7]
+    return svg(w, 5, body + sprite(GEM, GEM_PAL, gem_x, 0), "divider")
+
+
+def stack() -> str:
+    label_w, chip_h, pitch, body, width = 60, 13, 17, [], 0
+    for r, (name, color, items) in enumerate(STACK):
+        y, x = r * pitch, label_w
+        body += text(name, 0, y + 4, DIM)
+        for item in items:
+            cw = text_width(item) + 8
+            body += [rect(x, y, cw, chip_h, color), rect(x + 1, y + 1, cw - 2, chip_h - 2, PANEL)]
+            body += text(item, x + 4, y + 4, WHITE)
+            x += cw + 3
+        width = max(width, x - 3)
+    return svg(width, (len(STACK) - 1) * pitch + chip_h, body, "Tech stack", scale=3)
+
+
+def outputs() -> dict:
+    files = {"banner.svg": scene(), "footer.svg": scene(footer=True), "divider.svg": divider(), "stack.svg": stack()}
+    files.update({f"h-{key}.svg": heading(s) for key, s in HEADINGS.items()})
+    return files
 
 
 if __name__ == "__main__":
     out_dir = sys.argv[1] if len(sys.argv) > 1 else "assets"
     os.makedirs(out_dir, exist_ok=True)
-    for name, footer in (("banner.svg", False), ("footer.svg", True)):
-        svg = build(footer)
-        ET.fromstring(svg)  # must be well-formed XML
-        path = os.path.join(out_dir, name)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(svg)
-        print(f"wrote {path} ({len(svg) // 1024} KB)")
+    for name, content in outputs().items():
+        ET.fromstring(content)  # must be well-formed XML
+        with open(os.path.join(out_dir, name), "w", encoding="utf-8", newline="\n") as f:
+            f.write(content)
+        print(f"wrote {name} ({len(content) // 1024 or '<1'} KB)")

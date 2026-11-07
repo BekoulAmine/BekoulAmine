@@ -1,4 +1,4 @@
-name: 🐍 Abyss Serpent
+name: 🐍 Snake Game
 
 on:
   schedule:
@@ -17,9 +17,9 @@ jobs:
       - uses: Platane/snk@v3
         with:
           github_user_name: ${{ github.repository_owner }}
-          # Genshin palette: gold serpent over Anemo-green contribution dots
+          # neon-green snake eating GitHub-green contribution dots
           outputs: |
-            dist/genshin-snake.svg?color_snake=#d3bc8e&color_dots=#1f2333,#1f3d3a,#2e6b5e,#4fa38a,#74c2a8&color_background=#1b1d2a
+            dist/snake.svg?color_snake=#79ff97&color_dots=#161b22,#0e4429,#006d32,#26a641,#39d353&color_background=#0d1117
       - uses: crazy-max/ghaction-github-pages@v5
         with:
           target_branch: output

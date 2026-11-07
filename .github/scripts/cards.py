@@ -1,4 +1,4 @@
-"""Builds Genshin-themed stat cards (stats, languages, activity) as SVGs from the GitHub GraphQL API.
+"""Builds pixel-styled stat cards (stats, languages, activity) as SVGs from the GitHub GraphQL API.
 
 Self-hosted because the public github-readme-stats / trophy / activity-graph instances get paused.
 Usage: GITHUB_TOKEN=... python cards.py <username> <out_dir>
@@ -6,7 +6,9 @@ Usage: GITHUB_TOKEN=... python cards.py <username> <out_dir>
 import datetime, json, os, sys, urllib.request
 from html import escape
 
-BG, GOLD, ANEMO, TEXT, DIM = "#1b1d2a", "#d3bc8e", "#74c2a8", "#ece5d8", "#8e8e9e"
+import banner  # pixel font for the card titles
+
+BG, GREEN, TEXT, DIM, LINE = "#0d1117", "#79ff97", "#e6edf3", "#8b949e", "#30363d"
 FONT = "font-family=\"'Segoe UI', Ubuntu, sans-serif\""
 QUERY = """query($login: String!) { user(login: $login) {
   followers { totalCount }
@@ -25,7 +27,7 @@ def fetch(login: str, token: str) -> dict:
     req = urllib.request.Request(
         "https://api.github.com/graphql",
         data=json.dumps({"query": QUERY, "variables": {"login": login}}).encode(),
-        headers={"Authorization": f"bearer {token}", "User-Agent": "teyvat-cards"},
+        headers={"Authorization": f"bearer {token}", "User-Agent": "profile-cards"},
     )
     body = json.load(urllib.request.urlopen(req, timeout=30))
     if body.get("errors") or not body.get("data", {}).get("user"):
@@ -51,8 +53,9 @@ def streaks(days: list) -> tuple:
 def card(w: int, h: int, title: str, body: str) -> str:
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" {FONT}>'
-        f'<rect x="0.5" y="0.5" width="{w-1}" height="{h-1}" rx="10" fill="{BG}" stroke="{GOLD}" stroke-opacity="0.5"/>'
-        f'<text x="25" y="35" fill="{GOLD}" font-size="18" font-weight="700">✦ {escape(title)}</text>{body}</svg>'
+        f'<rect x="0.5" y="0.5" width="{w-1}" height="{h-1}" fill="{BG}" stroke="{LINE}"/>'
+        f'<g transform="translate(25 20) scale(3)" shape-rendering="crispEdges">{"".join(banner.text(title, 0, 0, GREEN))}</g>'
+        f'{body}</svg>'
     )
 
 
@@ -75,11 +78,11 @@ def stats_svg(u: dict) -> str:
         x, y = 25 + (i // 4) * 235, 70 + (i % 4) * 30
         body += (
             f'<text x="{x}" y="{y}" font-size="14" fill="{TEXT}">{icon} {escape(label)}</text>'
-            f'<text x="{x + 205}" y="{y}" font-size="14" font-weight="700" fill="{ANEMO}" text-anchor="end">{escape(str(val))}</text>'
+            f'<text x="{x + 205}" y="{y}" font-size="14" font-weight="700" fill="{GREEN}" text-anchor="end">{escape(str(val))}</text>'
         )
     total = cc["contributionCalendar"]["totalContributions"]
-    body += f'<text x="25" y="185" font-size="12" fill="{DIM}">{total} contributions in the last year · Ad astra abyssosque</text>'
-    return card(495, 200, "Adventure Stats", body)
+    body += f'<text x="25" y="185" font-size="12" fill="{DIM}">{total} contributions in the last year</text>'
+    return card(495, 200, "GITHUB STATS", body)
 
 
 def langs_svg(u: dict) -> str:
@@ -87,11 +90,11 @@ def langs_svg(u: dict) -> str:
     for r in u["repositories"]["nodes"]:
         for e in r["languages"]["edges"]:
             name = e["node"]["name"]
-            sizes[name] = (sizes.get(name, (0, None))[0] + e["size"], e["node"]["color"] or GOLD)
+            sizes[name] = (sizes.get(name, (0, None))[0] + e["size"], e["node"]["color"] or GREEN)
     top = sorted(sizes.items(), key=lambda kv: -kv[1][0])[:6]
     total = sum(s for _, (s, _) in top) or 1
     if not top:
-        return card(350, 200, "Elemental Mastery", f'<text x="25" y="100" font-size="14" fill="{DIM}">No code in public repos yet: the journey begins!</text>')
+        return card(350, 200, "TOP LANGUAGES", f'<text x="25" y="100" font-size="14" fill="{DIM}">No code in public repos yet: the journey begins!</text>')
     bar, x = "", 25.0
     for _, (s, color) in top:
         width = 300 * s / total
@@ -105,7 +108,7 @@ def langs_svg(u: dict) -> str:
             f'<circle cx="{x + 5}" cy="{y - 5}" r="5" fill="{color}"/>'
             f'<text x="{x + 16}" y="{y}" font-size="13" fill="{TEXT}">{escape(name)} <tspan fill="{DIM}">{100 * s / total:.1f}%</tspan></text>'
         )
-    return card(350, 200, "Elemental Mastery", bar + items)
+    return card(350, 200, "TOP LANGUAGES", bar + items)
 
 
 def activity_svg(u: dict) -> str:
@@ -128,11 +131,11 @@ def activity_svg(u: dict) -> str:
     )
     body = (
         grid
-        + f'<polygon points="{area}" fill="{ANEMO}" fill-opacity="0.25"/>'
-        + f'<polyline points="{line}" fill="none" stroke="{ANEMO}" stroke-width="2"/>'
+        + f'<polygon points="{area}" fill="{GREEN}" fill-opacity="0.25"/>'
+        + f'<polyline points="{line}" fill="none" stroke="{GREEN}" stroke-width="2"/>'
         + dots + labels
     )
-    return card(880, 250, "Resin Spent · last 31 days of contributions", body)
+    return card(880, 250, "CONTRIBUTIONS", body)
 
 
 def main() -> None:
